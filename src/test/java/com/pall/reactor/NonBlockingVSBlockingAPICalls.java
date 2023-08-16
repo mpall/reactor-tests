@@ -24,96 +24,112 @@ import reactor.test.StepVerifier;
 @WireMockTest
 public class NonBlockingVSBlockingAPICalls {
 
-    @BeforeEach
-    public void stubs() {
-        stubFor(get(urlEqualTo("/fast"))
-            .willReturn(aResponse()
-                 .withStatus(200)
-                 .withBody("Fast Response"))
-            );
-
-        stubFor(get(urlEqualTo("/slow"))
-            .willReturn(aResponse()
-                .withFixedDelay(500)
-                .withStatus(200)
-                .withBody("Slow Response"))
-            );
-    }
-
-    @Test
-    @DisplayName("Non-blocking API call does not require additional threads to serve the fastest responses first")
-    public void testNonBlocking(WireMockRuntimeInfo wmRuntimeInfo) {
-        // Given a sequence where the slowest API is called first
-        Flux<String> flux = Flux.just(
-            "/slow", 
-            "/fast", 
-            "/fast")
-            .flatMap(uri -> 
-                    create(format("http://localhost:%s", wmRuntimeInfo.getHttpPort()))
-                    .get()
-                    .uri(uri)
-       // When a non-blocking API call is made
-                    .retrieve()
-                    .bodyToFlux(String.class));
-
-        // Then the fastest responses are served first as the call is non-blocking
-        StepVerifier.create(flux)
-            .expectNext("Fast Response", 
-                        "Fast Response", 
-                        "Slow Response")
-            .verifyComplete();
-    }
-
-    @Test
-    @DisplayName("Blocking API client does NOT serve the fasted response first")
-    public void testBlockingCall(WireMockRuntimeInfo wmRuntimeInfo) {
-        // Given a sequence where the slowest API is called first
-        Flux<String> flux = Flux.just(
-            "/slow", 
-            "/fast", 
-            "/fast")
-            .map(uri -> 
-                create(format("http://localhost:%s", wmRuntimeInfo.getHttpPort()))
-                .get()
-                .uri(uri)
-        // When a blocking API call is made
-                .retrieve()
-                .bodyToFlux(String.class)
-                .blockFirst());
-
-        // Then the slowest response is still served first
-        StepVerifier.create(flux)
-            .expectNext("Slow Response", 
-                        "Fast Response", 
-                        "Fast Response")
-            .verifyComplete();
-
-    }
-
-    @Test
-    @DisplayName("If additional threads are spun up then Blocking API client can serve the fasted response first")
-    public void testBlockingCall_BoundedElastic(WireMockRuntimeInfo wmRuntimeInfo) {
-        // Given a sequence where the slowest API is called first
-        Flux<String> flux = Flux.just(
-            "/slow", 
-            "/fast", 
-            "/fast")
-            .flatMap(uri -> Mono.just(uri)
-        // And blocking call can run in additional threads
-                .publishOn(Schedulers.boundedElastic())
-                .map(u -> 
-                    create(format("http://localhost:%s", wmRuntimeInfo.getHttpPort())).get().uri(u)
-        // When a blocking call is made
-                .retrieve()
-                .bodyToFlux(String.class)
-                .blockFirst()));
-
-        // Then the fastest responses are served first
-        StepVerifier.create(flux)
-            .expectNext("Fast Response", 
-                        "Fast Response", 
-                        "Slow Response")
-            .verifyComplete();
-    }
-
+	@BeforeEach
+	public void stubs() {
+		System.out.println("started");
+		stubFor(get(urlEqualTo("/fast"))
+		        .willReturn(aResponse()
+		            .withStatus(200)
+		            .withBody("Fast Response")
+		            )		        
+		        );
+		
+		stubFor(get(urlEqualTo("/slow"))
+		        .willReturn(aResponse()
+		        	.withFixedDelay(500)
+		            .withStatus(200)
+		            .withBody("Slow Response")
+		            )		        
+		        );
+	}
+	
+	@Test
+	@DisplayName("Non-blocking API client does not require additional threads to serve the fastest responses first")
+	public void testNonBlocking(WireMockRuntimeInfo wmRuntimeInfo) {
+		//Given a sequence resulting in the slowest API being called first		
+		Flux<String> flux = Flux.just(
+				"/slow", 
+				"/fast",
+				"/fast"
+				).flatMap(uri -> create(format("http://localhost:%s", wmRuntimeInfo.getHttpPort()))
+					.get()
+					.uri(uri)
+		//When a non-blocking API call is made
+					.retrieve()
+					.bodyToFlux(String.class)	
+		);
+		
+		//Then the fastest responses are served first as the call is non-blocking		
+		StepVerifier.create(flux)
+			.expectNext(
+					"Fast Response",
+					"Fast Response",
+					"Slow Response"
+					)
+			.verifyComplete();
+	}
+	
+	@Test
+	@DisplayName("Blocking API client does NOT serve the fasted response first")
+	public void testBlockingCall(WireMockRuntimeInfo wmRuntimeInfo) {		
+		//Given a sequence resulting in the slowest API being called first
+		Flux<String> flux = Flux.just(
+				"/slow", 
+				"/fast",
+				"/fast"
+				).map(uri -> create(format("http://localhost:%s", wmRuntimeInfo.getHttpPort()))
+					.get()
+					.uri(uri)
+					.retrieve()
+					.bodyToFlux(String.class)
+		//When a blocking API call is made
+					.blockFirst()
+		);
+		
+		//Then the slowest response is still served first
+		StepVerifier.create(flux)
+		.expectNext(
+				"Slow Response",
+				"Fast Response",
+				"Fast Response"
+				)
+		.verifyComplete();
+		
+	}
+	
+	@Test
+	@DisplayName("If additional threads are spun up then Blocking API client can serve the fastest response first")
+	public void testBlockingCall_BoundedElastic(WireMockRuntimeInfo wmRuntimeInfo) {		
+		//Given a sequence resulting in the slowest API being called first
+		Flux<String> flux = Flux.just(
+				"/slow", 
+				"/fast",
+				"/fast"
+				).flatMap(uri -> 
+					Mono.just(uri)
+		//And blocking call can run in additional threads
+						.publishOn(Schedulers.boundedElastic())
+							.map(u ->
+								create(format("http://localhost:%s", wmRuntimeInfo.getHttpPort()))
+								.get()
+								.uri(u)
+								.retrieve()
+								.bodyToFlux(String.class)
+		//When a blocking call is made
+								.blockFirst()
+								)
+							);
+		
+		//Then the fastest responses are served first
+		StepVerifier.create(flux)
+		.expectNext(
+				"Fast Response",
+				"Fast Response",
+				"Slow Response"
+				)
+		.verifyComplete();
+		
+	}
+	
+	
 }
