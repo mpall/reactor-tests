@@ -1,5 +1,6 @@
 package com.pall.reactor;
 
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -63,7 +64,7 @@ public class CrossCuttingTest {
 
 					@Override
 					public void onNext(T o) {
-						System.out.println(String.format("Lift Function: Step[%s] onNext [%s]", scannable.stepName(), o));
+						System.out.println(format("Lift Function: Step[%s] onNext [%s]", scannable.stepName(), o));
 						countOfDecoratorOnNextCalls.incrementAndGet();
 						sub.onNext(o);
 					}
