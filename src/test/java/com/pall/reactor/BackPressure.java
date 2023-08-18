@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import reactor.core.publisher.Flux;
@@ -148,27 +147,34 @@ public class BackPressure {
         assertEquals("greater than buffer size so trigger overflow and raise exception", overflowQueue.poll());
     }
     
-    @Disabled
+    @Test
     void backPressure_BufferOverflowStrategyWithTTL() throws Exception {
         Queue<Long> overflowQueue = new ConcurrentLinkedQueue<>();
         
         StepVerifier.withVirtualTime(() -> 
-            Flux.interval(Duration.ofMinutes(1)).onBackpressureBuffer(Duration.ofMinutes(10), 2, overflowQueue::add), 0)   
+                Flux.concat(
+                    Flux.interval(Duration.ofMinutes(1)).take(8),
+                    Flux.interval(Duration.ofMinutes(20)) //interval greater than 10 minute ttl
+                ).onBackpressureBuffer(Duration.ofMinutes(10), 2, overflowQueue::add), 0)   
             .thenAwait(Duration.ofMinutes(2))
+            // ticks 0 and 1 fills buffer
             .thenRequest(2)
+            //buffer empty ttl reset
             .expectNext(0l, 1l)
             .thenAwait(Duration.ofMinutes(4))
+            //ticks 2 and 3 aged out of buffer into strategy. Buffer full with 4 and 5
             .thenRequest(2)
             .expectNext(4l, 5l)
-            .thenAwait(Duration.ofMinutes(4))
+            //buffer empty ttl reset
+            //ticks 6 and 7 into buffer
+            //Flux interval now 20 minutes
+            .thenAwait(Duration.ofMinutes(18)) // wait is greater then ttl so buffered 6 and 7 to overflow
             .thenRequest(2)
-            .expectNext(8l, 9l)
+            //no items returned as buffer is empty
             .thenCancel()
             .verify();
         
-        assertEquals(6, overflowQueue.size());
-        assertEquals(2, overflowQueue.poll());
-        assertEquals(3, overflowQueue.poll());
+        assertIterableEquals(List.of(2l,3l,6l,7l), overflowQueue);
     }
     
     @Test
