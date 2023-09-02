@@ -9,10 +9,10 @@ import org.reactivestreams.Subscription;
 
 public class MyMapOperation<T, V> implements Publisher<V> {
 
-    private MyPublisher<T> sourcePublisher;
+    private Publisher<T> sourcePublisher;
     private Function<T, V> mapper = null;
     
-    public MyMapOperation(MyPublisher<T> sourcePublisher, Function<T, V> mapper) {
+    public MyMapOperation(Publisher<T> sourcePublisher, Function<T, V> mapper) {
         super();
         this.sourcePublisher = sourcePublisher;
         this.mapper = mapper;

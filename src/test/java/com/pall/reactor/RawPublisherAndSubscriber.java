@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.pall.reactor.raw.MyFlux;
 import com.pall.reactor.raw.MyMapOperation;
 import com.pall.reactor.raw.MyNOOPOperation;
 import com.pall.reactor.raw.MyPublisher;
@@ -131,7 +132,7 @@ public class RawPublisherAndSubscriber {
     }
     
     @Test
-    void simpleOperation_doesNothing() throws Exception {
+    void simpleOperation_DoesNothing() throws Exception {
         MyPublisher<String> publisher = new MyPublisher<>();
         
         MyNOOPOperation<String> operation = new MyNOOPOperation<>(publisher);
@@ -145,7 +146,7 @@ public class RawPublisherAndSubscriber {
     }
     
     @Test
-    void simpleOperation_map() throws Exception {
+    void simpleOperation_Map() throws Exception {
         MyPublisher<String> publisher = new MyPublisher<>();     
         MyMapOperation<String, String> operation = 
                 new MyMapOperation<>(publisher, v -> v + "map");
@@ -154,6 +155,40 @@ public class RawPublisherAndSubscriber {
             .thenRequest(2)
             .then(() -> publisher.next("1", "2"))
             .expectNext("1map", "2map")
+            .then(() -> publisher.complete())
+            .verifyComplete();
+        
+    }
+    
+    @Test
+    void fluxLikeAPI_Create() throws Exception {
+        MyPublisher<String> publisher = new MyPublisher<>();     
+        
+        MyFlux<String> flux = MyFlux.create(publisher);
+        
+        StepVerifier.create(flux, 0)
+            .thenRequest(2)
+            .then(() -> publisher.next("1", "2"))
+            .expectNext("1", "2")
+            .then(() -> publisher.complete())
+            .verifyComplete();
+    }
+    
+    
+    @Test
+    void fluxLikeAPI_Map() throws Exception {
+        MyPublisher<String> publisher = new MyPublisher<>();     
+        
+        //The map flux is an almost exact copy of MyMapOperation to help
+        //in understanding how operators are chained
+        MyFlux<String> flux = MyFlux.create(publisher)
+                .map(v -> v + "_first")
+                .map(v -> v + "_second");
+        
+        StepVerifier.create(flux, 0)
+            .thenRequest(2)
+            .then(() -> publisher.next("1", "2"))
+            .expectNext("1_first_second", "2_first_second")
             .then(() -> publisher.complete())
             .verifyComplete();
         
