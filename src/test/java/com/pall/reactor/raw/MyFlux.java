@@ -8,7 +8,7 @@ import org.reactivestreams.Subscriber;
 //Very rough Flux to get a basic understanding on how the Flux API works
 public abstract class MyFlux<T> implements Publisher<T> {
 
-    public static <T> MyFlux<T> create(MyPublisher<T> publisher) {
+    public static <T> MyFlux<T> create(Publisher<T> publisher) {
         return new MyCreateFlux<T>(publisher);
     }
     

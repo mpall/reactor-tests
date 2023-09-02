@@ -1,12 +1,13 @@
 package com.pall.reactor.raw;
 
+import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 
 public class MyCreateFlux<T> extends MyFlux<T> {
 
-    private MyPublisher<T> publisher;
+    private Publisher<T> publisher;
 
-    public MyCreateFlux(MyPublisher<T> publisher) {
+    public MyCreateFlux(Publisher<T> publisher) {
         this.publisher = publisher;
     }
 
