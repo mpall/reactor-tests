@@ -35,7 +35,7 @@ public class MyPublisher<T> implements Publisher<T>, Subscription{
 
     @Override
     public void request(long requested) {
-        this.requested = requested;
+        this.requested = this.requested + requested;
         
     }
 
