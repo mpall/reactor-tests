@@ -16,5 +16,9 @@ Demo of:
 ## Base understanding of core reactive interfaces
 Attempt to understand Publishers, Subscribers, Operations and Fluxes by creating noddy implementations. [RawPublisherAndSubscriber](https://github.com/mpall/reactor-tests/blob/master/src/test/java/com/pall/reactor/RawPublisherAndSubscriber.java)
 
+## Add decorator to every operation
+This pattern could be used as an alternative to threadlocal for setting global logging values on each onNext request.
+[CrossCuttingTest](https://github.com/mpall/reactor-tests/blob/master/src/test/java/com/pall/reactor/CrossCuttingTest.java)
+
 ## The rest
 The rest of the tests have been created off the back of the [projectreactor reference](https://projectreactor.io/docs/core/release/reference/) to reenforce how reactor works.
