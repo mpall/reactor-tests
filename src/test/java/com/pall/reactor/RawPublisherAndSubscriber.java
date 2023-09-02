@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.pall.reactor.raw.MyMapOperation;
+import com.pall.reactor.raw.MyNOOPOperation;
 import com.pall.reactor.raw.MyPublisher;
 import com.pall.reactor.raw.MySubscriber;
 
@@ -126,7 +128,37 @@ public class RawPublisherAndSubscriber {
             .expectNext("1", "2")
             .then(() -> publisher.complete())
             .verifyComplete();
-    }    
+    }
+    
+    @Test
+    void simpleOperation_doesNothing() throws Exception {
+        MyPublisher<String> publisher = new MyPublisher<>();
+        
+        MyNOOPOperation<String> operation = new MyNOOPOperation<>(publisher);
+        
+        StepVerifier.create(operation, 0)
+            .thenRequest(2)
+            .then(() -> publisher.next("1", "2"))
+            .expectNext("1", "2")
+            .then(() -> publisher.complete())
+            .verifyComplete();
+    }
+    
+    @Test
+    void simpleOperation_map() throws Exception {
+        MyPublisher<String> publisher = new MyPublisher<>();     
+        MyMapOperation<String, String> operation = 
+                new MyMapOperation<>(publisher, v -> v + "map");
+        
+        StepVerifier.create(operation, 0)
+            .thenRequest(2)
+            .then(() -> publisher.next("1", "2"))
+            .expectNext("1map", "2map")
+            .then(() -> publisher.complete())
+            .verifyComplete();
+        
+    }
+    
     
 
 }
