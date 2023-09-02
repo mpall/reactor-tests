@@ -39,6 +39,7 @@ public class MyPublisher<T> implements Publisher<T>, Subscription{
         
     }
 
+    @SuppressWarnings("unchecked")
     public void next(T... elements ) {
         Arrays.stream(elements).forEach(this::nextInternal);       
     }

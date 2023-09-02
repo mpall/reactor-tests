@@ -6,8 +6,6 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import reactor.util.annotation.NonNull;
-
 //Operation that does nothing other than to pass signals through.
 //Created to discover that basics of an operation.
 public class MyNOOPOperation<T> implements Publisher<T> {
