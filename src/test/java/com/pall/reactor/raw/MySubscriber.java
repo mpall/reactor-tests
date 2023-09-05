@@ -13,7 +13,7 @@ public class MySubscriber<T> implements Subscriber<T> {
     private Subscription subscription = null;
     private boolean onComplete = false;
     private Throwable throwable = null;
-
+    
     @Override
     public void onComplete() {
         onComplete = true;
@@ -36,6 +36,7 @@ public class MySubscriber<T> implements Subscriber<T> {
     }
 
     public void request(int i) {
+    	if(i < 0) {throw new RuntimeException("Negative value passed to request");}
         Objects.requireNonNull(subscription, "Subscription has not been passed to Subscriber")
             .request(i);
     }

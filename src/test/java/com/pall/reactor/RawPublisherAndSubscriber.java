@@ -46,6 +46,16 @@ public class RawPublisherAndSubscriber {
         
         assertIterableEquals(List.of("1"), subscriber.getOnNextElements());
     }
+    
+    @Test
+	void requestsMustBePositive() throws Exception {
+    	MyPublisher<String> publisher = new MyPublisher<>();
+        MySubscriber<String> subscriber = new MySubscriber<>();
+        publisher.subscribe(subscriber);
+        
+        Exception e = assertThrows(RuntimeException.class, () -> subscriber.request(-1));
+        assertEquals("Negative value passed to request", e.getMessage());        
+	}
 
     @Test
     void moreElementsPublishedThanRequested() throws Exception {
@@ -56,7 +66,7 @@ public class RawPublisherAndSubscriber {
         subscriber.request(1);
         publisher.next("1");
         
-        Exception e = assertThrows(RuntimeException.class, () -> publisher.next("2"), "More elements published than requested");
+        Exception e = assertThrows(RuntimeException.class, () -> publisher.next("2"));
         assertEquals("More elements published than requested", e.getMessage());
     }
 

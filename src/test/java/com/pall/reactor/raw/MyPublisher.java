@@ -14,26 +14,18 @@ public class MyPublisher<T> implements Publisher<T>, Subscription{
     private long requested = 0;
     private boolean cancelled = false;
 
-    @Override
+    @Override //Publisher
     public void subscribe(Subscriber<? super T> subscriber) {
         this.subscriber = subscriber;
         subscriber.onSubscribe(this);
     }
 
-    private void nextInternal(T element) {
-        Objects.requireNonNull(subscriber, "Attempted to publish element prior to publisher being subscribed to");
-        if (cancelled) {throw new RuntimeException("Publisher cancelled by subscriber");}
-        if (requested == 0) {throw new RuntimeException("More elements published than requested");}
-        subscriber.onNext(element);
-        requested--;
-    }
-
-    @Override
+    @Override //Subscription
     public void cancel() {
         cancelled = true;
     }
 
-    @Override
+    @Override //Subscription
     public void request(long requested) {
         this.requested = this.requested + requested;
         
@@ -52,6 +44,11 @@ public class MyPublisher<T> implements Publisher<T>, Subscription{
         subscriber.onError(throwable);
     }
     
-    
-
+    private void nextInternal(T element) {
+    	Objects.requireNonNull(subscriber, "Attempted to publish element prior to publisher being subscribed to");
+    	if (cancelled) {throw new RuntimeException("Publisher cancelled by subscriber");}
+    	if (requested == 0) {throw new RuntimeException("More elements published than requested");}
+    	subscriber.onNext(element);
+    	requested--;
+    }
 }
