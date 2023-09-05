@@ -48,14 +48,14 @@ public class RawPublisherAndSubscriber {
     }
     
     @Test
-	void requestsMustBePositive() throws Exception {
+    void requestsMustBePositive() throws Exception {
     	MyPublisher<String> publisher = new MyPublisher<>();
         MySubscriber<String> subscriber = new MySubscriber<>();
         publisher.subscribe(subscriber);
         
         Exception e = assertThrows(RuntimeException.class, () -> subscriber.request(-1));
         assertEquals("Negative value passed to request", e.getMessage());        
-	}
+    }
 
     @Test
     void moreElementsPublishedThanRequested() throws Exception {

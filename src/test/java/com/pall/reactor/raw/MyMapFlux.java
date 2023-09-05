@@ -1,6 +1,7 @@
 package com.pall.reactor.raw;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
+
 import java.util.function.Function;
 
 import org.reactivestreams.Subscriber;
@@ -15,14 +16,13 @@ public class MyMapFlux<I, O> extends MyFlux<O> {
 
     public MyMapFlux(MyFlux<I> sourcePublisher, Function<I, O> mapper) {
         super();
-        this.sourcePublisher = sourcePublisher;
-        this.mapper = mapper;
+        this.sourcePublisher = requireNonNull(sourcePublisher, "sourcePublisher cannot be null");
+        this.mapper = requireNonNull(mapper, "mapper cannot be null");
     }
 
     @Override
     public void subscribe(Subscriber<? super O> targetSubscriptionSubscriber) {
-        Objects.requireNonNull(sourcePublisher, "Source Publisher has not been set in Operation")
-                .subscribe(new Subscriber<I>() {
+        sourcePublisher.subscribe(new Subscriber<I>() {
 
                     @Override
                     public void onComplete() {
