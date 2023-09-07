@@ -1,7 +1,8 @@
 package com.pall.reactor.raw;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Arrays;
-import java.util.Objects;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -27,6 +28,7 @@ public class MyPublisher<T> implements Publisher<T>, Subscription{
 
     @Override //Subscription
     public void request(long requested) {
+    	if(requested < 0) { throw new RuntimeException("Publisher request must be positive"); };
         this.requested = this.requested + requested;
         
     }
@@ -45,7 +47,7 @@ public class MyPublisher<T> implements Publisher<T>, Subscription{
     }
     
     private void nextInternal(T element) {
-    	Objects.requireNonNull(subscriber, "Attempted to publish element prior to publisher being subscribed to");
+    	requireNonNull(subscriber, "Attempted to publish element prior to publisher being subscribed to");
     	if (cancelled) {throw new RuntimeException("Publisher cancelled by subscriber");}
     	if (requested == 0) {throw new RuntimeException("More elements published than requested");}
     	subscriber.onNext(element);

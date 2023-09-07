@@ -36,6 +36,15 @@ public class RawPublisherAndSubscriber {
     }
     
     @Test
+	void requestIsPositive() throws Exception {
+    	MyPublisher<String> publisher = new MyPublisher<>();
+        MySubscriber<String> subscriber = new MySubscriber<>();
+        publisher.subscribe(subscriber);
+        Exception e = assertThrows(RuntimeException.class, () -> publisher.request(-1));
+        assertEquals("Publisher request must be positive", e.getMessage());
+	}
+    
+    @Test
     void publishSingleElement() throws Exception {
         MyPublisher<String> publisher = new MyPublisher<>();
         MySubscriber<String> subscriber = new MySubscriber<>();
