@@ -210,9 +210,23 @@ public class RawPublisherAndSubscriber {
             .expectNext("1_first_second", "2_first_second")
             .then(() -> publisher.complete())
             .verifyComplete();
+    }
+
+    @Test
+    void fluxLikeAPI_MapToDifferentType() throws Exception {
+        MyPublisher<String> publisher = new MyPublisher<>();     
+
+        MyFlux<Integer> flux = MyFlux.create(publisher)
+                .map(v -> Integer.valueOf(v));
+        
+        StepVerifier.create(flux, 0)
+            .thenRequest(2)
+            .then(() -> publisher.next("1", "2"))
+            .expectNext(1, 2)
+            .then(() -> publisher.complete())
+            .verifyComplete();
         
     }
-    
     
 
 }
