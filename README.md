@@ -9,9 +9,13 @@ WARNING: This repo does not represent any good practice in testing or Java devel
 Demo of:
 * how slow IO does not block a sequence when code is non-blocking.
 * how blocking code does block a sequence.
-* how to make blocking code run on a seperate thread to not block a sequence. 
+* how to make blocking code run on a separate thread to not block a sequence. 
 
 [NonBlockingVSBlockingAPICalls](https://github.com/mpall/reactor-tests/blob/master/src/test/java/com/pall/reactor/NonBlockingVSBlockingAPICalls.java)
+
+* Aggregating non-blocking API calls together
+
+[NonBlockingAggPattern](https://github.com/mpall/reactor-tests/blob/master/src/test/java/com/pall/reactor/NonBlockingAggPattern.java)
 
 ## Base understanding of core reactive interfaces
 Attempt to understand Publisher and Subscriber interfaces by creating basic implementations. Sample implementations include [MyPublisher](https://github.com/mpall/reactor-tests/blob/master/src/test/java/com/pall/reactor/raw/MyPublisher.java), [MySubscriber](https://github.com/mpall/reactor-tests/blob/master/src/test/java/com/pall/reactor/raw/MySubscriber.java) and [MyFlux](https://github.com/mpall/reactor-tests/blob/master/src/test/java/com/pall/reactor/raw/MyFlux.java). Tests are in [RawPublisherAndSubscriber](https://github.com/mpall/reactor-tests/blob/master/src/test/java/com/pall/reactor/RawPublisherAndSubscriber.java)
