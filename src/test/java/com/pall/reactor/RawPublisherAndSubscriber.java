@@ -36,7 +36,7 @@ public class RawPublisherAndSubscriber {
     }
     
     @Test
-	void requestIsPositive() throws Exception {
+	void publisherOnlyAcceptsPositiveValueOnRequestedItems() throws Exception {
     	MyPublisher<String> publisher = new MyPublisher<>();
         MySubscriber<String> subscriber = new MySubscriber<>();
         publisher.subscribe(subscriber);
@@ -44,6 +44,16 @@ public class RawPublisherAndSubscriber {
         assertEquals("Publisher request must be positive", e.getMessage());
 	}
     
+    @Test
+    void valueOnRequestedItemsInitiatedFromSubscriberMustBePositive() throws Exception {
+        MyPublisher<String> publisher = new MyPublisher<>();
+        MySubscriber<String> subscriber = new MySubscriber<>();
+        publisher.subscribe(subscriber);
+        
+        Exception e = assertThrows(RuntimeException.class, () -> subscriber.request(-1));
+        assertEquals("Negative value passed to request", e.getMessage());        
+    }
+
     @Test
     void publishSingleElement() throws Exception {
         MyPublisher<String> publisher = new MyPublisher<>();
@@ -56,15 +66,6 @@ public class RawPublisherAndSubscriber {
         assertIterableEquals(List.of("1"), subscriber.getOnNextElements());
     }
     
-    @Test
-    void requestsMustBePositive() throws Exception {
-    	MyPublisher<String> publisher = new MyPublisher<>();
-        MySubscriber<String> subscriber = new MySubscriber<>();
-        publisher.subscribe(subscriber);
-        
-        Exception e = assertThrows(RuntimeException.class, () -> subscriber.request(-1));
-        assertEquals("Negative value passed to request", e.getMessage());        
-    }
 
     @Test
     void moreElementsPublishedThanRequested() throws Exception {
@@ -210,8 +211,9 @@ public class RawPublisherAndSubscriber {
             .expectNext("1_first_second", "2_first_second")
             .then(() -> publisher.complete())
             .verifyComplete();
+        
     }
-
+    
     @Test
     void fluxLikeAPI_MapToDifferentType() throws Exception {
         MyPublisher<String> publisher = new MyPublisher<>();     
@@ -227,6 +229,7 @@ public class RawPublisherAndSubscriber {
             .verifyComplete();
         
     }
+    
     
 
 }
